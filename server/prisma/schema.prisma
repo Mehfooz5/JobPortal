@@ -1,0 +1,115 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role{
+  seeker
+  hirer
+  admin
+}
+
+enum JobType{
+  PART_TIME
+  FULL_TIME
+  REMOTE
+}
+
+model User{
+  user_id Int @id @default(autoincrement())
+  role Role
+  fullname String
+  email String @unique
+  password String
+  phoneNumber String @unique
+  profileImage String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  company Company @relation(fields: [companyID], references: [company_id])
+  companyID Int
+
+  seekers SeekerProfile[]
+  jobs Job[]
+  applications Application[]
+  savedJobs SavedJobs[]
+}
+
+model Company{
+  company_id Int @id @default(autoincrement())
+  company_name String
+  email String @unique
+  phoneNumber String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  users User[]
+  jobs Job[]
+}
+
+model SeekerProfile{
+  seeker_id Int @id @map("user_id")
+  education String? 
+  skills String?
+  experience String?
+  cv String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  users User @relation(fields: [seeker_id], references: [user_id])
+}
+
+model Job{
+  job_id Int @id @default(autoincrement())
+  title String
+  category String
+  companyID Int
+  postedBy Int
+  location String
+  salary Float
+  jobType JobType
+  description String
+  requirements String[]
+  experience String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  companies Company @relation(fields: [companyID], references: [company_id])
+  users User @relation(fields: [postedBy], references: [user_id])
+
+  applications Application[]
+  savedJobs SavedJobs[]
+}
+
+model Application{
+  application_id Int @id @default(autoincrement())
+  jobID Int
+  userID Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  job Job @relation(fields: [jobID], references: [job_id])
+  user User @relation(fields: [userID], references: [user_id])
+}
+
+model SavedJobs{
+  saved_id Int @id @default(autoincrement())
+  jobID Int
+  userID Int
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  job Job @relation(fields: [jobID], references: [job_id])
+  user User @relation(fields: [userID], references: [user_id])
+}

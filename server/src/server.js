@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import ConnectDB from "./config/db.js";
 import cors from "cors";
 import GlobalErrorHandler from "./config/errorHandler.js";
+import userRouter from "./routes/user.routes.js"
 
 dotenv.config();
 const app = express();
@@ -17,6 +18,9 @@ app.use(
 app.use(express.json());
 
 app.use(GlobalErrorHandler);
+
+app.use("/api/v1/user", userRouter)
+
   
 
 function serverStart() {
